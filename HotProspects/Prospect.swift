@@ -15,10 +15,40 @@ class Prospect: Identifiable, Codable {
 }
 
 class Prospects: ObservableObject {
-    @Published var people = [Prospect]()
+    @Published private(set) var people: [Prospect]
+    
+    private static let saveKey = "SavedData"
+    
+    init() {
+        do {
+            if let data = UserDefaults.standard.data(forKey: Self.saveKey) {
+                people = try JSONDecoder().decode([Prospect].self, from: data)
+                return
+            }
+        } catch {
+            print("Error decoding data: \(error.localizedDescription)")
+        }
+        
+        people = []
+    }
     
     func toggle(_ prospect: Prospect) {
         objectWillChange.send()
         prospect.isContacted.toggle()
+        save()
+    }
+    
+    func add(_ prospect: Prospect) {
+        people.append(prospect)
+        save()
+    }
+    
+    private func save() {
+        do {
+            let data = try JSONEncoder().encode(people)
+            UserDefaults.standard.set(data, forKey: Self.saveKey)
+        } catch {
+            print("Error saving: \(error.localizedDescription)")
+        }
     }
 }
