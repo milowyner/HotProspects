@@ -23,11 +23,11 @@ class Prospect: Identifiable, Codable {
 class Prospects: ObservableObject {
     @Published private(set) var people: [Prospect]
     
-    private static let saveKey = "SavedData"
+    private static let saveURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("prospects.json")
     
     init() {
         do {
-            if let data = UserDefaults.standard.data(forKey: Self.saveKey) {
+            if let data = try? Data(contentsOf: Self.saveURL) {
                 people = try JSONDecoder().decode([Prospect].self, from: data)
                 return
             }
@@ -56,7 +56,7 @@ class Prospects: ObservableObject {
     private func save() {
         do {
             let data = try JSONEncoder().encode(people)
-            UserDefaults.standard.set(data, forKey: Self.saveKey)
+            try data.write(to: Self.saveURL)
         } catch {
             print("Error saving: \(error.localizedDescription)")
         }
