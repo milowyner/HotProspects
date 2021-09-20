@@ -41,11 +41,20 @@ struct ProspectsView: View {
         NavigationView {
             List {
                 ForEach(filteredProspects) { prospect in
-                    VStack(alignment: .leading) {
-                        Text(prospect.name)
-                            .font(.headline)
-                        Text(prospect.emailAddress)
-                            .foregroundColor(.secondary)
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(prospect.name)
+                                .font(.headline)
+                            Text(prospect.emailAddress)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        
+                        if filter == .none {
+                            Image(systemName: "\(prospect.isContacted ? "checkmark" : "questionmark")")
+                                .font(.system(size: 20).bold())
+                                .frame(width: 45)
+                        }
                     }
                     .contextMenu(ContextMenu(menuItems: {
                         Button(prospect.isContacted ? "Mark Uncontacted" : "Mark Contacted") {
@@ -127,7 +136,13 @@ struct ProspectsView: View {
 }
 
 struct ProspectsView_Previews: PreviewProvider {
+    static let prospects = Prospects(people: [
+        Prospect(name: "Paul Hudson", emailAddress: "paul@hackingwithswift.com"),
+        Prospect(name: "Paul Hudson", emailAddress: "paul@hackingwithswift.com", isContacted: true)
+    ])
+    
     static var previews: some View {
         ProspectsView(filter: .none)
+            .environmentObject(prospects)
     }
 }

@@ -9,9 +9,15 @@ import SwiftUI
 
 class Prospect: Identifiable, Codable {
     private(set) var uuid = UUID()
-    var name = "Anonymous"
-    var emailAddress = ""
-    fileprivate(set) var isContacted = false
+    var name: String
+    var emailAddress: String
+    fileprivate(set) var isContacted: Bool
+    
+    init(name: String = "Anonymous", emailAddress: String = "", isContacted: Bool = false) {
+        self.name = name
+        self.emailAddress = emailAddress
+        self.isContacted = isContacted
+    }
 }
 
 class Prospects: ObservableObject {
@@ -30,6 +36,10 @@ class Prospects: ObservableObject {
         }
         
         people = []
+    }
+    
+    init(people: [Prospect]) {
+        self.people = people
     }
     
     func toggle(_ prospect: Prospect) {
