@@ -12,11 +12,13 @@ class Prospect: Identifiable, Codable {
     var name: String
     var emailAddress: String
     fileprivate(set) var isContacted: Bool
+    private(set) var dateAdded: Date
     
     init(name: String = "Anonymous", emailAddress: String = "", isContacted: Bool = false) {
         self.name = name
         self.emailAddress = emailAddress
         self.isContacted = isContacted
+        self.dateAdded = Date()
     }
 }
 

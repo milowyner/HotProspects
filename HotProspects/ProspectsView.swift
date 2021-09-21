@@ -14,8 +14,14 @@ struct ProspectsView: View {
         case none, contacted, uncontacted
     }
     
+    private enum SortType {
+        case name, recent
+    }
+    
     @EnvironmentObject var prospects: Prospects
     @State private var isShowingScanner = false
+    @State private var isShowingSortOptions = false
+    @State private var sort: SortType = .recent
     let filter: FilterType
     
     var title: String {
@@ -27,14 +33,27 @@ struct ProspectsView: View {
     }
     
     var filteredProspects: [Prospect] {
+        var filtered: [Prospect]
         switch filter {
         case .none:
-            return prospects.people
+            filtered = prospects.people
         case .contacted:
-            return prospects.people.filter { $0.isContacted }
+            filtered = prospects.people.filter { $0.isContacted }
         case .uncontacted:
-            return prospects.people.filter { !$0.isContacted }
+            filtered = prospects.people.filter { !$0.isContacted }
         }
+        
+        switch sort {
+        case .name:
+            return filtered.sorted { $0.name < $1.name }
+        case .recent:
+            return filtered.sorted { $0.dateAdded < $1.dateAdded }
+        }
+        
+    }
+    
+    private var simulatedData: String {
+        "\(["P", "B", "G", "H", "M", "R", "S"].randomElement()!)aul Hudson\npaul@hackingwithswift.com"
     }
     
     var body: some View {
@@ -69,16 +88,38 @@ struct ProspectsView: View {
                 }
             }
             .navigationTitle(title)
-            .navigationBarItems(trailing: Button(action: {
-                isShowingScanner = true
-            }) {
-                Image(systemName: "qrcode.viewfinder")
-                Text("Scan")
-            })
+            .navigationBarItems(
+                leading: Button("Sort", action: {
+                    isShowingSortOptions = true
+                }),
+                trailing: Button(action: {
+                    isShowingScanner = true
+                }, label: {
+                    Image(systemName: "qrcode.viewfinder")
+                    Text("Scan")
+                })
+            )
             .sheet(isPresented: $isShowingScanner, content: {
-                CodeScannerView(codeTypes: [.qr], simulatedData: "Paul Hudson\npaul@hackingwithswift.com", completion: handleScan)
+                CodeScannerView(codeTypes: [.qr], simulatedData: simulatedData, completion: handleScan)
                 .edgesIgnoringSafeArea(.all)
             })
+            .actionSheet(isPresented: $isShowingSortOptions) {
+                ActionSheet(title: Text("Sort By"), buttons: [
+                    .default(
+                        Text("Name"),
+                        action: {
+                            sort = .name
+                        }
+                    ),
+                    .default(
+                        Text("Most Recent"),
+                        action: {
+                            sort = .recent
+                        }
+                    ),
+                    .cancel()
+                ])
+            }
         }
     }
     
